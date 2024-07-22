@@ -601,11 +601,17 @@ class FormTimeline extends BaseTimeline {
 		}
 	}
 
+
+
+
+
 	setup_comment_actions(comment_wrapper, doc) {
 		let edit_wrapper = $(`<div class="comment-edit-box">`).hide();
 		let edit_box = this.make_editable(edit_wrapper);
 		let content_wrapper = comment_wrapper.find(".content");
 		let more_actions_wrapper = comment_wrapper.find(".more-actions");
+	
+		// Check if the user can delete the comment
 		if (
 			frappe.model.can_delete("Comment") &&
 			(frappe.session.user == doc.owner || frappe.user.has_role("System Manager"))
@@ -619,22 +625,22 @@ class FormTimeline extends BaseTimeline {
 			`).click(() => this.delete_comment(doc.name));
 			more_actions_wrapper.find(".dropdown-menu").append(delete_option);
 		}
-
+	
 		let dismiss_button = $(`
 			<button class="btn btn-link action-btn">
 				${__("Dismiss")}
 			</button>
 		`).click(() => edit_button.toggle_edit_mode());
 		dismiss_button.hide();
-
+	
 		edit_box.set_value(doc.content);
-
+	
 		edit_box.on_submit = (value) => {
 			content_wrapper.empty();
 			content_wrapper.append(value);
 			edit_button.prop("disabled", true);
 			edit_box.quill.enable(false);
-
+	
 			doc.content = value;
 			this.update_comment(doc.name, value)
 				.then(edit_button.toggle_edit_mode)
@@ -643,31 +649,102 @@ class FormTimeline extends BaseTimeline {
 					edit_box.quill.enable(true);
 				});
 		};
-
+	
 		content_wrapper.after(edit_wrapper);
-
-		let edit_button = $();
-		let current_user = frappe.session.user;
-		if (["Administrator", doc.owner].includes(current_user)) {
-			edit_button = $(`<button class="btn btn-link action-btn">${__("Edit")}</a>`).click(
+	
+		// Only create the edit button if the current user is the Administrator
+		if (frappe.session.user == "Administrator") {
+			let edit_button = $(`<button class="btn btn-link action-btn">${__("Edit")}</button>`).click(
 				() => {
 					edit_button.edit_mode ? edit_box.submit() : edit_button.toggle_edit_mode();
 				}
 			);
+	
+			edit_button.toggle_edit_mode = () => {
+				edit_button.edit_mode = !edit_button.edit_mode;
+				edit_button.text(edit_button.edit_mode ? __("Save") : __("Edit"));
+				more_actions_wrapper.toggle(!edit_button.edit_mode);
+				dismiss_button.toggle(edit_button.edit_mode);
+				edit_wrapper.toggle(edit_button.edit_mode);
+				content_wrapper.toggle(!edit_button.edit_mode);
+			};
+	
+			let actions_wrapper = comment_wrapper.find(".custom-actions");
+			actions_wrapper.append(edit_button);
+			actions_wrapper.append(dismiss_button);
 		}
-
-		edit_button.toggle_edit_mode = () => {
-			edit_button.edit_mode = !edit_button.edit_mode;
-			edit_button.text(edit_button.edit_mode ? __("Save") : __("Edit"));
-			more_actions_wrapper.toggle(!edit_button.edit_mode);
-			dismiss_button.toggle(edit_button.edit_mode);
-			edit_wrapper.toggle(edit_button.edit_mode);
-			content_wrapper.toggle(!edit_button.edit_mode);
-		};
-		let actions_wrapper = comment_wrapper.find(".custom-actions");
-		actions_wrapper.append(edit_button);
-		actions_wrapper.append(dismiss_button);
 	}
+
+	
+
+	
+	// setup_comment_actions(comment_wrapper, doc) {
+	// 	let edit_wrapper = $(`<div class="comment-edit-box">`).hide();
+	// 	let edit_box = this.make_editable(edit_wrapper);
+	// 	let content_wrapper = comment_wrapper.find(".content");
+	// 	let more_actions_wrapper = comment_wrapper.find(".more-actions");
+	// 	if (
+	// 		frappe.model.can_delete("Comment") &&
+	// 		(frappe.session.user == doc.owner || frappe.user.has_role("System Manager"))
+	// 	) {
+	// 		const delete_option = $(`
+	// 			<li>
+	// 				<a class="dropdown-item">
+	// 					${__("Delete")}
+	// 				</a>
+	// 			</li>
+	// 		`).click(() => this.delete_comment(doc.name));
+	// 		more_actions_wrapper.find(".dropdown-menu").append(delete_option);
+	// 	}
+
+	// 	let dismiss_button = $(`
+	// 		<button class="btn btn-link action-btn">
+	// 			${__("Dismiss")}
+	// 		</button>
+	// 	`).click(() => edit_button.toggle_edit_mode());
+	// 	dismiss_button.hide();
+
+	// 	edit_box.set_value(doc.content);
+
+	// 	edit_box.on_submit = (value) => {
+	// 		content_wrapper.empty();
+	// 		content_wrapper.append(value);
+	// 		edit_button.prop("disabled", true);
+	// 		edit_box.quill.enable(false);
+
+	// 		doc.content = value;
+	// 		this.update_comment(doc.name, value)
+	// 			.then(edit_button.toggle_edit_mode)
+	// 			.finally(() => {
+	// 				edit_button.prop("disabled", false);
+	// 				edit_box.quill.enable(true);
+	// 			});
+	// 	};
+
+	// 	content_wrapper.after(edit_wrapper);
+
+	// 	let edit_button = $();
+	// 	let current_user = frappe.session.user;
+	// 	if (["Administrator", doc.owner].includes(current_user)) {
+	// 		edit_button = $(`<button class="btn btn-link action-btn">${__("Edit........")}</a>`).click(
+	// 			() => {
+	// 				edit_button.edit_mode ? edit_box.submit() : edit_button.toggle_edit_mode();
+	// 			}
+	// 		);
+	// 	}
+
+	// 	edit_button.toggle_edit_mode = () => {
+	// 		edit_button.edit_mode = !edit_button.edit_mode;
+	// 		edit_button.text(edit_button.edit_mode ? __("Save") : __("Edit"));
+	// 		more_actions_wrapper.toggle(!edit_button.edit_mode);
+	// 		dismiss_button.toggle(edit_button.edit_mode);
+	// 		edit_wrapper.toggle(edit_button.edit_mode);
+	// 		content_wrapper.toggle(!edit_button.edit_mode);
+	// 	};
+	// 	let actions_wrapper = comment_wrapper.find(".custom-actions");
+	// 	actions_wrapper.append(edit_button);
+	// 	actions_wrapper.append(dismiss_button);
+	// }
 
 	make_editable(container) {
 		return frappe.ui.form.make_control({

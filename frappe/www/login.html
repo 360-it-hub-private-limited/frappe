@@ -332,49 +332,54 @@
 				
 			</div> -->
 			<div class="right">
-			<form class="form-signin form-login" role="form">
-				{{ logo_section() }}
-				{%- if social_login or login_with_email_link -%}
-				
-				<div class="page-card-body">
-					
-					<form class="form-signin form-login" role="form">
-						
-						<div class="inputs">
-						{{ email_login_body() }}
-					</div>
-					</form>
-					<div class="social-logins text-center">
-						{% if not disable_user_pass_login or (ldap_settings and ldap_settings.enabled) %}
-						<p class="text-muted login-divider">{{ _("or") }}</p>
-						{% endif %}
-						<div class="social-login-buttons">
-							{% for provider in provider_logins %}
-							<div class="login-button-wrapper">
-								<a href="{{ provider.auth_url }}"
-									class="btn btn-block btn-default btn-sm btn-login-option btn-{{ provider.name }}">
-									{% if provider.icon %}
-										{{ provider.icon }}
+				<section class='for-login'>
+					{{ logo_section() }}
+					<div class="login-content page-card">
+						<form class="form-signin form-login" role="form">
+							{%- if social_login or login_with_email_link -%}
+							<div class="page-card-body">
+								<form class="form-signin form-login" role="form">
+									{{ email_login_body() }}
+								</form>
+								<div class="social-logins text-center">
+									{% if not disable_user_pass_login or (ldap_settings and ldap_settings.enabled) %}
+									<p class="text-muted login-divider">{{ _("or") }}</p>
 									{% endif %}
-									{{ _("Login With {0}").format(provider.provider_name) }}</a>
+									<div class="social-login-buttons">
+										{% for provider in provider_logins %}
+										<div class="login-button-wrapper">
+											<a href="{{ provider.auth_url }}"
+												class="btn btn-block btn-default btn-sm btn-login-option btn-{{ provider.name }}">
+												{% if provider.icon %}
+													{{ provider.icon }}
+												{% endif %}
+												{{ _("Login With {0}").format(provider.provider_name) }}</a>
+										</div>
+										{% endfor %}
+									</div>
+									{% if login_with_email_link %}
+									<div class="login-with-email-link social-login-buttons">
+										<div class="login-button-wrapper">
+											<a href="#login-with-email-link"
+												class="btn btn-block btn-default btn-sm btn-login-option btn-login-with-email-link">
+												{{ _("Login with Email Link") }}</a>
+										</div>
+									</div>
+									{% endif %}
+								</div>
 							</div>
-							{% endfor %}
-						</div>
-						{% if login_with_email_link %}
-						<div class="login-with-email-link social-login-buttons">
-							<div class="login-button-wrapper">
-								<a href="#login-with-email-link"
-									class="btn btn-block btn-default btn-sm btn-login-option btn-login-with-email-link">
-									{{ _("Login with Email Link") }}</a>
-							</div>
-						</div>
-						{% endif %}
+							{% else %}
+								{{ email_login_body() }}
+							{%- endif -%}
+						</form>
 					</div>
-				</div>
-				{% else %}
-					{{ email_login_body() }}
-				{%- endif -%}
-			</form>
+					{%- if not disable_signup and not disable_user_pass_login -%}
+					<div class="text-center sign-up-message">
+						{{ _("Don't have an account?") }}
+						<a href="#signup">{{ _("Sign up") }}</a>
+					</div>
+					{%- endif -%}
+				</section>
 		</div>
 		</div>
 		{%- if not disable_signup and not disable_user_pass_login -%}
